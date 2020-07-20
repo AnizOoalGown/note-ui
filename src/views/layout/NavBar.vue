@@ -14,7 +14,7 @@
                 <el-menu-item index="/about">关于Notes</el-menu-item>
             </el-menu>
         </el-col>
-        <el-col :offset="1" :span="2" class="username">Username</el-col>
+        <el-col :offset="1" :span="2" class="username">{{ $store.getters.username }}</el-col>
     </el-row>
 </template>
 

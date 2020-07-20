@@ -12,21 +12,24 @@
             </el-form>
         </el-tab-pane>
         <el-tab-pane label="注册" name="register">
-            <el-form :model="form" :rules="rules" hide-required-asterisk ref="registerForm">
+            <el-form :model="form"
+                     status-icon
+                     :rules="rules"
+                     ref="form"
+                     hide-required-asterisk>
                 <el-form-item label="用户名" prop="username">
-                    <el-input v-model="form.username"></el-input>
+                    <el-input v-model="form.username" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="密码" prop="password">
-                    <el-input v-model="form.password" type="password"></el-input>
+                    <el-input type="password" v-model="form.password" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="角色" prop="role">
-                    <el-select v-model="form.role" placeholder="select role" style="width: 100%">
-                        <el-option label="ADMIN" value="ADMIN"></el-option>
-                        <el-option label="DESIGNER" value="DESIGNER"></el-option>
-                        <el-option label="VIEWER" value="VIEWER"></el-option>
-                    </el-select>
+                <el-form-item label="确认密码" prop="checkPassword">
+                    <el-input type="password" v-model="form.checkPassword" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-button type="primary" @click="onSignUp">注册</el-button>
+                <el-form-item>
+                    <el-button type="primary" @click="onSignUp">注册</el-button>
+                    <el-button @click="resetSignUp">重置</el-button>
+                </el-form-item>
             </el-form>
         </el-tab-pane>
     </el-tabs>
@@ -36,22 +39,42 @@
     export default {
         name: 'Login',
         data() {
+            const validatePass = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请输入密码'))
+                } else {
+                    if (this.form.checkPassword !== '') {
+                        this.$refs.form.validateField('checkPassword')
+                    }
+                    callback()
+                }
+            }
+            const validatePass2 = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请再次输入密码'))
+                } else if (value !== this.form.password) {
+                    callback(new Error('两次输入密码不一致!'))
+                } else {
+                    callback()
+                }
+            }
+
             return {
                 activeName: 'login',
                 form: {
                     username: '',
                     password: '',
-                    role: ''
+                    checkPassword: ''
                 },
                 rules: {
                     username: [
                         { required: true, message: 'Enter username', trigger: 'blur' }
                     ],
                     password: [
-                        { required: true, message: 'Enter password', trigger: 'blur' }
+                        { validator: validatePass, trigger: 'blur' }
                     ],
-                    role: [
-                        { required: true, message: 'Select role', trigger: 'blur' }
+                    checkPassword: [
+                        { validator: validatePass2, trigger: 'blur' }
                     ]
                 }
             }
@@ -61,6 +84,17 @@
                 this.$router.push('/')
             },
             onSignUp() {
+                this.$refs.form.validate((valid) => {
+                    if (valid) {
+                        alert('submit!')
+                    } else {
+                        console.log('error submit!!')
+                        return false;
+                    }
+                })
+            },
+            resetSignUp() {
+                this.$refs.form.resetFields()
             }
         }
     }

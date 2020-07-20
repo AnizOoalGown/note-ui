@@ -1,6 +1,9 @@
 <template>
     <div>
-        <mavon-editor v-model="content"
+        <mavon-editor ref="md"
+                      v-model="content"
+                      defaultOpen="preview"
+                      :subfield="false"
                       class="mavon-editor"/>
     </div>
 </template>
@@ -11,11 +14,11 @@
 
         data() {
             return {
-                content: ''
+                content: '',
             }
         },
 
-        method: {
+        methods: {
             save() {
                 console.log(this.$route.params.id)
             }
