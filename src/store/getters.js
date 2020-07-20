@@ -1,6 +1,6 @@
 const getters = {
     userId: state => state.user.id,
-    username: state => state.user.name,
+    username: state => state.user.username,
     lastViewNoteId: state => state.user.lastViewNoteId
 }
 

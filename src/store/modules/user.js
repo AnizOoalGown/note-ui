@@ -1,14 +1,14 @@
 const user = {
     state: {
         id: '',
-        name: 'Aniz',
+        username: 'Aniz',
         lastViewNoteId: ''
     },
 
     mutations: {
         setUser: (state, user) => {
             state.id = user.id
-            state.name = user.name
+            state.username = user.username
             state.lastViewNoteId = user.lastViewNoteId
         },
         setLastViewNoteId: (state, lastViewNoteId) => {

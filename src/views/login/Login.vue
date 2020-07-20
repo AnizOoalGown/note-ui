@@ -28,7 +28,6 @@
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="onSignUp">注册</el-button>
-                    <el-button @click="resetSignUp">重置</el-button>
                 </el-form-item>
             </el-form>
         </el-tab-pane>
@@ -68,7 +67,8 @@
                 },
                 rules: {
                     username: [
-                        { required: true, message: 'Enter username', trigger: 'blur' }
+                        { required: true, message: '请输入用户名', trigger: 'blur' },
+                        { max: 16, message: '长度小于16个字符', trigger: 'blur' }
                     ],
                     password: [
                         { validator: validatePass, trigger: 'blur' }
@@ -81,7 +81,7 @@
         },
         methods: {
             onLogin() {
-                this.$router.push('/')
+                this.$router.push('/note/' + this.$store.getters.lastViewNoteId)
             },
             onSignUp() {
                 this.$refs.form.validate((valid) => {
@@ -92,9 +92,6 @@
                         return false;
                     }
                 })
-            },
-            resetSignUp() {
-                this.$refs.form.resetFields()
             }
         }
     }

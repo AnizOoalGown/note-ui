@@ -15,7 +15,7 @@ export const routes = [
                 children: [
                     {
                         path: '',
-                        component: () => import('@/views/about/About'),
+                        component: () => import('@/views/note/DefaultNote'),
                     },
                     {
                         path: ':id',
