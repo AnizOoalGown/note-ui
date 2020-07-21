@@ -9,7 +9,12 @@
     import NavBar from "@/views/layout/NavBar";
     export default {
         name: "Layout",
-        components: {NavBar}
+        components: {NavBar},
+        mounted () {
+            window.addEventListener('beforeunload', () => {
+                // save lastViewNoteId
+            })
+        },
     }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div>
 
         <div class="header">
             <el-input placeholder="输入关键字"
@@ -93,7 +93,7 @@
         data() {
             return {
                 filterText: '',
-                editable: true,
+                editable: false,
                 newDialogVisible: false,
                 tmpData: {},
                 tree: [{
@@ -107,7 +107,11 @@
                         children: [{
                             id: 3,
                             type: 'document',
-                            name: '三级 1-1-1'
+                            name: '三级 1-1-3'
+                        }, {
+                            id: 4,
+                            type: 'document',
+                            name: '三级 1-1-4'
                         }]
                     }]
                 }],
@@ -206,14 +210,8 @@
 </script>
 
 <style scoped type="scss">
-    .container {
-        /*padding: 20px;*/
-        /*box-sizing: border-box;*/
-    }
-
     .header {
         padding: 30px 30px 20px 30px;
-        /*margin-bottom: 10px;*/
         display: flex;
         flex: 1;
         align-items: center;
