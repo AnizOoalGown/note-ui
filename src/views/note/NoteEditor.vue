@@ -25,9 +25,12 @@
             save() {
                 console.log(this.$route.params.id)
             },
-            imgAdd(pos, /*$file*/){
-                this.$refs.md.$img2Url(pos,
-                    'https://pic2.zhimg.com/80/v2-a248b8f1b73c4521eb84b694c25cb3da_720w.jpg?source=1940ef5c')
+            imgAdd(pos, file){
+                console.log(file)
+                // https://pic2.zhimg.com/80/v2-a248b8f1b73c4521eb84b694c25cb3da_720w.jpg?source=1940ef5c
+                const id = new Date().getTime() % 1e6 + ''
+                this.$refs.md.$img2Url(pos, id)
+                this.$refs.md.$imgUpdateByUrl(id, file.miniurl)
             },
             imgDel(/*map*/){
                 // http
