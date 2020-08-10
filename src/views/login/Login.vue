@@ -8,7 +8,7 @@
                 <el-form-item label="密码" prop="password">
                     <el-input v-model="form.password" type="password"></el-input>
                 </el-form-item>
-                <el-button type="primary" @click="onLogin">登录</el-button>
+                <el-button type="primary" @click="onLogin" :loading="loading">登录</el-button>
             </el-form>
         </el-tab-pane>
         <el-tab-pane label="注册" name="register">
@@ -27,7 +27,7 @@
                     <el-input type="password" v-model="form.checkPassword" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="onSignUp">注册</el-button>
+                    <el-button type="primary" @click="onSignUp" :loading="loading">注册</el-button>
                 </el-form-item>
             </el-form>
         </el-tab-pane>
@@ -35,6 +35,9 @@
 </template>
 
 <script>
+    import {login, createUser} from "@/api/user";
+    import {setToken} from "@/utils/token";
+
     export default {
         name: 'Login',
         data() {
@@ -60,6 +63,7 @@
 
             return {
                 activeName: 'login',
+                loading: false,
                 form: {
                     username: '',
                     password: '',
@@ -81,15 +85,25 @@
         },
         methods: {
             onLogin() {
-                this.$router.push('/note/' + this.$store.getters.lastViewNoteId)
+                this.$refs.form.validate((valid) => {
+                    if (valid) {
+                        this.loading = true
+                        login(this.form.username, this.form.password).then(res => {
+                            this.$store.commit('setUser', res.data.user)
+                            setToken(res.data.token)
+                            this.$router.push('/note')
+                        }).catch(err => console.log(err)).finally(() => this.loading = false)
+                    }
+                })
             },
             onSignUp() {
                 this.$refs.form.validate((valid) => {
                     if (valid) {
-                        alert('submit!')
-                    } else {
-                        console.log('error submit!!')
-                        return false;
+                        this.loading = true
+                        createUser(this.form.username, this.form.password).then(() => {
+                            this.$message.success("注册成功")
+                            this.activeName = 'login'
+                        }).catch(err => console.log(err)).finally(() => this.loading = false)
                     }
                 })
             }

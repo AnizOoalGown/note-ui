@@ -14,6 +14,7 @@
         <div class="main">
             <el-tree ref="tree"
                      :data="tree"
+                     :default-expanded-keys="[161197]"
                      :draggable="editable"
                      :filter-node-method="filterNode"
                      :expand-on-click-node="!editable"
@@ -88,6 +89,8 @@
 </template>
 
 <script>
+    import {createNote} from "@/api/note";
+
     export default {
         name: "NoteMenu",
         data() {
@@ -105,11 +108,11 @@
                         type: 'folder',
                         name: '二级 1-1',
                         children: [{
-                            id: 3,
+                            id: 161197,
                             type: 'document',
                             name: '三级 1-1-3'
                         }, {
-                            id: 4,
+                            id: 124638,
                             type: 'document',
                             name: '三级 1-1-4'
                         }]
@@ -157,22 +160,35 @@
             onConfirm(data) {
                 this.$refs.form.validate(valid => {
                     if (valid) {
-                        const child = {
-                            id: new Date().getTime() % 1e6,
-                            type: this.form.type,
-                            name: this.form.name,
-                            children: []
-                        }
-                        if (data) {
-                            if (!data.children) {
-                                this.$set(data, 'children', []);
+                        const appendChild = id => {
+                            const child = {
+                                id: id,
+                                type: this.form.type,
+                                name: this.form.name,
+                                children: []
                             }
-                            data.children.push(child)
+                            if (data) {
+                                if (!data.children) {
+                                    this.$set(data, 'children', []);
+                                }
+                                data.children.push(child)
+                            }
+                            else {
+                                this.tree.push(child)
+                            }
+                            this.newDialogVisible = false
+                        }
+
+                        if (this.form.type === 'document') {
+                            createNote().then(res => {
+                                const id = res.data
+                                appendChild(id)
+                                this.$router.push('/note/' + id)
+                            })
                         }
                         else {
-                            this.tree.push(child)
+                            appendChild(new Date().getTime() % 1e6)
                         }
-                        this.newDialogVisible = false
                     }
                 })
             },

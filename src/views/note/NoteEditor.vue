@@ -2,6 +2,7 @@
     <div>
         <mavon-editor ref="md"
                       v-model="content"
+                      v-loading="loading"
                       defaultOpen="preview"
                       :subfield="false"
                       @save="save"
@@ -12,29 +13,44 @@
 </template>
 
 <script>
+    import {getNoteById, updateNote} from "@/api/note";
+
     export default {
         name: 'NoteEditor',
 
         data() {
             return {
-                content: ''
+                content: '',
+                images: [],
+                loading: false
             }
         },
 
         methods: {
             save() {
-                console.log(this.$route.params.id)
+                console.log('save' + this.$route.params.id)
+                updateNote({
+                    id: this.$route.params.id,
+                    content: this.content
+                }).then(res => this.$message.success(res.msg))
             },
-            imgAdd(pos, file){
+            imgAdd(pos, file) {
                 console.log(file)
                 // https://pic2.zhimg.com/80/v2-a248b8f1b73c4521eb84b694c25cb3da_720w.jpg?source=1940ef5c
                 const id = new Date().getTime() % 1e6 + ''
                 this.$refs.md.$img2Url(pos, id)
                 this.$refs.md.$imgUpdateByUrl(id, file.miniurl)
             },
-            imgDel(/*map*/){
+            imgDel(/*map*/) {
                 // http
             },
+            viewNote(noteId) {
+                this.loading = true
+                getNoteById(noteId).then(res => {
+                    this.content = res.data.note.content
+                    this.images = res.data.images
+                }).finally(() => this.loading = false)
+            }
         },
 
         mounted () {
@@ -44,12 +60,14 @@
         },
 
         beforeRouteEnter(to, from, next) {
-            next(vm => vm.$store.commit('setLastViewNoteId', vm.$route.params.id))
+            next(vm => {
+                vm.viewNote(vm.$route.params.id)
+            })
         },
 
         beforeRouteUpdate (to, from, next) {
             this.save()
-            this.$store.commit('setLastViewNoteId', to.params.id)
+            this.viewNote(to.params.id)
             next()
         },
 

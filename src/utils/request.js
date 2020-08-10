@@ -1,26 +1,40 @@
 import axios from 'axios'
 import {Notification} from 'element-ui'
+import { getToken } from '@/utils/token'
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
-const service = axios.create({
+const instance = axios.create({
     baseURL: '/api',
     timeout: 10000
 })
 
-// service.interceptors.request.use()
+instance.interceptors.request.use(
+    config => {
+        if (getToken()) {
+            config.headers['Authorization'] = 'Bearer ' + getToken()
+        }
+        return config
+    },
+    error => {
+        Notification.error(error)
+    }
+)
 
-service.interceptors.response.use(res => {
+instance.interceptors.response.use(res => {
     if (res.data.code !== 200) {
-        Notification.error({
+        Notification.warning({
             title: res.data.code,
             message: res.data.msg
         })
-        return Promise.reject(res)
+        return Promise.reject(res.data)
     }
     else {
         return res.data
     }
+}, error => {
+    Notification.error(error.message)
+    return Promise.reject(error)
 })
 
-export default service
+export default instance
