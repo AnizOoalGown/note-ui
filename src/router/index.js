@@ -7,6 +7,7 @@ Vue.use(Router)
 export const routes = [
     {
         path: '/',
+        redirect: '/note',
         component: Layout,
         children: [
             {
@@ -38,6 +39,11 @@ export const routes = [
         component: () => import('@/views/login/Login')
     }
 ]
+
+const originalPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+    return originalPush.call(this, location).catch(err => err)
+}
 
 export default new Router({
     mode: 'history',

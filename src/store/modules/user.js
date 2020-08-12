@@ -1,7 +1,7 @@
 const user = {
     state: {
-        id: '',
-        username: 'Aniz'
+        id: undefined,
+        username: undefined
     },
 
     mutations: {

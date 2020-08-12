@@ -47,7 +47,7 @@
 
             <div class="title">退出登录</div>
             <el-divider/>
-            <el-button>退出登录</el-button>
+            <el-button @click="logout">退出登录</el-button>
 
             <div class="title">销户</div>
             <el-divider/>
@@ -57,6 +57,9 @@
 </template>
 
 <script>
+    import {logout} from "@/api/user";
+    import {removeToken} from "@/utils/token";
+
     export default {
         name: 'Profile',
 
@@ -140,6 +143,22 @@
             resetPasswordForm() {
                 this.$refs.passwordForm.resetFields()
                 this.savePasswordShow = false
+            },
+            logout() {
+                this.$confirm('确定退出登录？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    logout().then(() => {
+                        removeToken()
+                        this.$store.commit('setUser', {
+                            id: undefined,
+                            username: undefined
+                        })
+                        location.reload()
+                    }).catch(err => console.log(err))
+                })
             }
         }
     }

@@ -4,6 +4,7 @@ import ElementUI from 'element-ui'
 import router from './router'
 import mavonEditor from 'mavon-editor'
 import store from './store'
+import './permission'
 
 import '@/assets/styles/element-ui.css'
 import 'element-ui/lib/theme-chalk/index.css';

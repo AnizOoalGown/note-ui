@@ -21,8 +21,9 @@ export function logout() {
 
 export function getUser(id) {
     return request({
-        url: '/users/' + id,
-        method: 'get'
+        url: '/users',
+        method: 'get',
+        params: {id}
     })
 }
 

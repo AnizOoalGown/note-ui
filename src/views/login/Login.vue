@@ -1,7 +1,9 @@
 <template>
     <el-tabs v-model="activeName" class="login-container" align="center" label-width="80px" stretch type="border-card">
         <el-tab-pane label="登录" name="login">
-            <el-form :model="form">
+            <el-form :model="form"
+                     ref="loginForm"
+                     :rules="rules">
                 <el-form-item label="用户名" prop="username">
                     <el-input v-model="form.username"></el-input>
                 </el-form-item>
@@ -15,7 +17,7 @@
             <el-form :model="form"
                      status-icon
                      :rules="rules"
-                     ref="form"
+                     ref="registerForm"
                      hide-required-asterisk>
                 <el-form-item label="用户名" prop="username">
                     <el-input v-model="form.username" autocomplete="off"></el-input>
@@ -80,24 +82,33 @@
                     checkPassword: [
                         { validator: validatePass2, trigger: 'blur' }
                     ]
-                }
+                },
+                redirect: undefined
+            }
+        },
+        watch: {
+            $route: {
+                handler: function(route) {
+                    this.redirect = route.query && route.query.redirect
+                },
+                immediate: true
             }
         },
         methods: {
             onLogin() {
-                this.$refs.form.validate((valid) => {
+                this.$refs.loginForm.validate((valid) => {
                     if (valid) {
                         this.loading = true
                         login(this.form.username, this.form.password).then(res => {
                             this.$store.commit('setUser', res.data.user)
                             setToken(res.data.token)
-                            this.$router.push('/note')
+                            this.$router.push({ path: this.redirect || "/" });
                         }).catch(err => console.log(err)).finally(() => this.loading = false)
                     }
                 })
             },
             onSignUp() {
-                this.$refs.form.validate((valid) => {
+                this.$refs.registerForm.validate((valid) => {
                     if (valid) {
                         this.loading = true
                         createUser(this.form.username, this.form.password).then(() => {

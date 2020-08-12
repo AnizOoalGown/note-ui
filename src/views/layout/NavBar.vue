@@ -4,7 +4,7 @@
         <el-col :offset="2" :span="16">
             <el-menu class="menubar"
                      :router="true"
-                     :default-active="activeIndex"
+                     :default-active="this.$route.path"
                      mode="horizontal"
                      background-color="#2B2B2B"
                      text-color="#fff"
@@ -20,12 +20,7 @@
 
 <script>
     export default {
-        name: "NavBar",
-        data() {
-            return {
-                activeIndex: '/note'
-            }
-        }
+        name: "NavBar"
     }
 </script>
 
