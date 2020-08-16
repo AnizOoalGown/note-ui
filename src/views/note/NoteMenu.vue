@@ -11,7 +11,7 @@
             <el-switch v-model="editable" active-text="编辑"/>
         </div>
 
-        <div class="main">
+        <div class="main" v-loading="treeLoading">
             <el-tree ref="tree"
                      :data="tree"
                      :default-expanded-keys="[161197]"
@@ -31,10 +31,10 @@
                     <el-button type="text"
                                icon="el-icon-plus"
                                v-if="data.type === 'folder'"
-                               @click="onAppend(data)"/>
+                               @click="onAppend(false, data)"/>
                     <el-button type="text"
                                icon="el-icon-edit"
-                               @click="onEdit()"/>
+                               @click="onEdit(data)"/>
                     <el-popconfirm :title="deleteText(data)"
                                    style="margin-left: 10px"
                                    @onConfirm="onDelete(node, data)">
@@ -49,7 +49,7 @@
             <el-button type="text"
                        icon="el-icon-folder-add"
                        v-if="editable"
-                       @click="onAppend()"
+                       @click="onAppend(true)"
                        style="margin-left: 30px; font-size: 19px"> 新建
             </el-button>
         </div>
@@ -82,14 +82,35 @@
 
             <span slot="footer" class="dialog-footer">
                 <el-button @click="newDialogVisible = false" size="medium">取消</el-button>
-                <el-button type="primary" @click="onConfirm(tmpData)" size="medium">确定</el-button>
+                <el-button type="primary" @click="onConfirm()" size="medium">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog title="重命名"
+                   :visible.sync="editDialogVisible"
+                   width="500px"
+                   :append-to-body="true">
+            <el-form ref="editForm" :model="form"
+                     label-width="150px"
+                     :rules="rules"
+                     hide-required-asterisk>
+                <el-form-item :label="typeText + '名'">
+                    <el-input v-model="form.name"
+                              size="small"
+                              :placeholder="'请输入' + typeText + '名'"
+                              style="width: 200px"/>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="editDialogVisible = false" size="medium">取消</el-button>
+                <el-button type="primary" @click="onEditConfirm()" size="medium">确定</el-button>
             </span>
         </el-dialog>
     </div>
 </template>
 
 <script>
-    import {createNote} from "@/api/note";
+    import {createNote, deleteNote, getMenuTreeByUserId, updateNote} from "@/api/note";
 
     export default {
         name: "NoteMenu",
@@ -98,26 +119,15 @@
                 filterText: '',
                 editable: false,
                 newDialogVisible: false,
-                tmpData: {},
-                tree: [{
-                    id: 1,
-                    type: 'folder',
-                    name: '一级 1',
-                    children: [{
-                        id: 2,
-                        type: 'folder',
-                        name: '二级 1-1',
-                        children: [{
-                            id: 161197,
-                            type: 'document',
-                            name: '三级 1-1-3'
-                        }, {
-                            id: 124638,
-                            type: 'document',
-                            name: '三级 1-1-4'
-                        }]
-                    }]
-                }],
+                editDialogVisible: false,
+                tmpData: {
+                    id: undefined,
+                    root: true,
+                    parentId: undefined,
+                    orderNo: undefined,
+                },
+                tree: [],
+                treeLoading: false,
                 defaultProps: {
                     children: 'children',
                     label: 'name'
@@ -141,7 +151,7 @@
         methods: {
             filterNode(value, data) {
                 if (!value) return true
-                return data.label.indexOf(value) !== -1
+                return data.name.indexOf(value) !== -1
             },
             nodeClick(data) {
                 if (data.type === 'document' &&
@@ -149,64 +159,91 @@
                     this.$router.push('/note/' + data.id)
                 }
             },
-            onAppend(data) {
-                this.form.parentName = (data && data.name) || '根目录'
-                this.tmpData = data
+            onAppend(root, data) {
+                this.tmpData.root = root
+                if (root) {
+                    this.form.parentName = '根目录'
+                    this.tmpData.parentId = 0
+                    this.tmpData.orderNo = this.tree.length
+                } else {
+                    this.form.parentName = data.name
+                    this.tmpData.parentId = data.id
+                    this.tmpData.orderNo = data.children.length
+                }
                 this.newDialogVisible = true
                 this.$nextTick(() => {
                     this.$refs.form.resetFields()
                 })
             },
-            onConfirm(data) {
+            onConfirm() {
                 this.$refs.form.validate(valid => {
                     if (valid) {
-                        const appendChild = id => {
-                            const child = {
-                                id: id,
-                                type: this.form.type,
-                                name: this.form.name,
-                                children: []
-                            }
-                            if (data) {
-                                if (!data.children) {
-                                    this.$set(data, 'children', []);
+                        this.treeLoading = true
+                        this.newDialogVisible = false
+                        const note = {
+                            type: this.form.type,
+                            name: this.form.name,
+                            parentId: this.tmpData.parentId,
+                            orderNo: this.tmpData.orderNo
+                        }
+                        createNote(note).then(res => {
+                            this.getMenuTree().then(() => {
+                                if (note.type === 'document') {
+                                    this.$router.push('/note/' + res.data)
                                 }
-                                data.children.push(child)
-                            }
-                            else {
-                                this.tree.push(child)
-                            }
-                            this.newDialogVisible = false
-                        }
-
-                        if (this.form.type === 'document') {
-                            createNote().then(res => {
-                                const id = res.data
-                                appendChild(id)
-                                this.$router.push('/note/' + id)
-                            })
-                        }
-                        else {
-                            appendChild(new Date().getTime() % 1e6)
-                        }
+                            }).finally(() => this.treeLoading = false)
+                        }).catch(err => console.log(err))
                     }
                 })
             },
-            onEdit() {
-
+            onEditConfirm() {
+                this.treeLoading = true
+                const note = {
+                    name: this.form.name,
+                    id: this.tmpData.id
+                }
+                updateNote(note).then(() => {
+                    this.getMenuTree().finally(() => this.treeLoading = false)
+                }).catch(err => console.log(err))
+            },
+            onEdit(data) {
+                this.tmpData.id = data.id
+                this.form.name = data.name
+                this.form.type = data.type
+                this.editDialogVisible = true
             },
             deleteText(data) {
                 if (data.children && data.children.length > 0)
-                    return '确认删除【' + data.name + '】及其中的内容？'
+                    return '确认删除“' + data.name + '”及其中的内容？'
                 else
-                    return '确认删除【' + data.name + '】？'
+                    return '确认删除“' + data.name + '“？'
             },
             onDelete(node, data) {
-                const parent = node.parent
-                const children = parent.data.children || parent.data
-                const index = children.findIndex(d => d.id === data.id)
-                children.splice(index, 1)
+                this.treeLoading = true
+                deleteNote(data.id)
+                    .then(() => {
+                        this.$router.replace('/note')
+                        this.getMenuTree().finally(() => this.treeLoading = false)
+                    })
+                    .catch(err => console.log(err))
+            },
+            getMenuTree() {
+                return new Promise(resolve => {
+                    getMenuTreeByUserId(this.$store.getters.userId)
+                        .then(res => this.tree = res.data)
+                        .catch(err => console.log(err))
+                        .finally(() => {
+                            resolve()
+                        })
+                })
             }
+        },
+
+        mounted() {
+            this.treeLoading = true
+            this.getMenuTree().finally(() => {
+                this.treeLoading = false
+            })
         },
 
         computed: {

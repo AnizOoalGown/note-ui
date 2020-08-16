@@ -1,11 +1,12 @@
 <template>
     <div>
         <mavon-editor ref="md"
+                      id="md"
                       v-model="content"
                       v-loading="loading"
                       defaultOpen="preview"
                       :subfield="false"
-                      @save="save"
+                      @save="save($route.params.id)"
                       @imgAdd="imgAdd"
                       @imgDel="imgDel"
                       class="mavon-editor"/>
@@ -27,12 +28,11 @@
         },
 
         methods: {
-            save() {
-                console.log('save' + this.$route.params.id)
+            save(noteId) {
                 updateNote({
-                    id: this.$route.params.id,
+                    id: noteId,
                     content: this.content
-                }).then(res => this.$message.success(res.msg))
+                })
             },
             imgAdd(pos, file) {
                 console.log(file)
@@ -47,7 +47,7 @@
             viewNote(noteId) {
                 this.loading = true
                 getNoteById(noteId).then(res => {
-                    this.content = res.data.note.content
+                    this.content = res.data.content
                     this.images = res.data.images
                 }).finally(() => this.loading = false)
             }
@@ -55,25 +55,20 @@
 
         mounted () {
             window.addEventListener('beforeunload', () => {
-                this.save()
+                this.save(this.$route.params.id)
             })
         },
 
-        beforeRouteEnter(to, from, next) {
-            next(vm => {
-                vm.viewNote(vm.$route.params.id)
-            })
-        },
-
-        beforeRouteUpdate (to, from, next) {
-            this.save()
-            this.viewNote(to.params.id)
-            next()
-        },
-
-        beforeRouteLeave (to, from, next) {
-            this.save()
-            next()
+        watch: {
+            '$route.params.id': {
+                handler: function (val, oldVal) {
+                    if (oldVal) {
+                        this.save(oldVal)
+                    }
+                    this.viewNote(val)
+                },
+                immediate: true
+            }
         }
     }
 </script>

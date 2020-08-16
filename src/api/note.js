@@ -7,10 +7,19 @@ export function getNoteById(id) {
     })
 }
 
-export function createNote() {
+export function getMenuTreeByUserId(userId) {
+    return request({
+        url: '/notes/menuTree',
+        method: 'get',
+        params: {userId}
+    })
+}
+
+export function createNote(note) {
     return request({
         url: '/notes',
-        method: 'post'
+        method: 'post',
+        data: note
     })
 }
 
@@ -24,7 +33,7 @@ export function updateNote(note) {
 
 export function deleteNote(id) {
     return request({
-        url: '/notes' + id,
+        url: '/notes/' + id,
         method: 'delete'
     })
 }
