@@ -20,6 +20,8 @@
                      :expand-on-click-node="!editable"
                      :props="defaultProps"
                      @node-click="nodeClick"
+                     :allow-drop="allowDrop"
+                     @node-drop="handleDrop"
                      class="tree scrollbar">
             <span slot-scope="{ node, data }" class="custom-tree-node">
                 <span>
@@ -30,13 +32,14 @@
                 <span v-if="editable">
                     <el-button type="text"
                                icon="el-icon-plus"
-                               v-if="data.type === 'folder'"
+                               :class="data.type === 'folder' ? 'visible' : 'invisible'"
                                @click="onAppend(false, data)"/>
                     <el-button type="text"
                                icon="el-icon-edit"
                                @click="onEdit(data)"/>
                     <el-popconfirm :title="deleteText(data)"
                                    style="margin-left: 10px"
+                                   :class="data.children && data.children.length > 0 ? 'invisible' : 'visible'"
                                    @onConfirm="onDelete(node, data)">
                         <el-button type="text"
                                    icon="el-icon-delete"
@@ -110,7 +113,7 @@
 </template>
 
 <script>
-    import {createNote, deleteNote, getMenuTreeByUserId, updateNote} from "@/api/note";
+    import {createNote, deleteNote, getMenuTreeByUserId, updateBatch, updateNote} from "@/api/note";
 
     export default {
         name: "NoteMenu",
@@ -159,6 +162,47 @@
                     this.$router.push('/note/' + data.id)
                 }
             },
+            allowDrop(draggingNode, dropNode, dropType) {
+                return !(dropNode.data.type === 'document' && dropType === 'inner')
+            },
+            handleDrop(draggingNode, dropNode, dropType) {
+                this.treeLoading = true
+                if (dropType === 'inner') {
+                    const note = {
+                        id: draggingNode.data.id,
+                        parentId: dropNode.data.id,
+                        orderNo: dropNode.data.children.length
+                    }
+                    this.updateNote(note)
+                }
+                else if (dropType === 'before' || dropType === 'after') {
+                    const notes = []
+                    let children, parentId
+                    if (dropNode.parent.id === 0) {
+                        children = this.tree
+                        parentId = 0
+                    }
+                    else {
+                        children = dropNode.parent.data.children
+                        parentId = dropNode.parent.data.id
+                    }
+                    children.forEach((item, index) => {
+                        if (index !== item.orderNo || item.id === draggingNode.data.id) {
+                            notes.push({
+                                id: item.id,
+                                parentId: parentId,
+                                orderNo: index
+                            })
+                        }
+                    })
+                    updateBatch(notes).then(() => {
+                        this.getMenuTree().finally(() => this.treeLoading = false)
+                    }).catch(err => {
+                        console.log(err)
+                        this.treeLoading = false
+                    })
+                }
+            },
             onAppend(root, data) {
                 this.tmpData.root = root
                 if (root) {
@@ -192,19 +236,29 @@
                                     this.$router.push('/note/' + res.data)
                                 }
                             }).finally(() => this.treeLoading = false)
-                        }).catch(err => console.log(err))
+                        }).catch(err => {
+                            console.log(err)
+                            this.treeLoading = false
+                        })
                     }
+                })
+            },
+            updateNote(note) {
+                updateNote(note).then(() => {
+                    this.getMenuTree().finally(() => this.treeLoading = false)
+                }).catch(err => {
+                    console.log(err)
+                    this.treeLoading = false
                 })
             },
             onEditConfirm() {
                 this.treeLoading = true
+                this.editDialogVisible = false
                 const note = {
                     name: this.form.name,
                     id: this.tmpData.id
                 }
-                updateNote(note).then(() => {
-                    this.getMenuTree().finally(() => this.treeLoading = false)
-                }).catch(err => console.log(err))
+                this.updateNote(note)
             },
             onEdit(data) {
                 this.tmpData.id = data.id
@@ -225,7 +279,10 @@
                         this.$router.replace('/note')
                         this.getMenuTree().finally(() => this.treeLoading = false)
                     })
-                    .catch(err => console.log(err))
+                    .catch(err => {
+                        console.log(err)
+                        this.treeLoading = false
+                    })
             },
             getMenuTree() {
                 return new Promise(resolve => {
@@ -295,5 +352,13 @@
         justify-content: space-between;
         font-size: 18px;
         padding-right: 20px;
+    }
+
+    .invisible {
+        visibility: hidden;
+    }
+
+    .visible {
+        visibility: visible;
     }
 </style>

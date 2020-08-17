@@ -31,6 +31,14 @@ export function updateNote(note) {
     })
 }
 
+export function updateBatch(notes) {
+    return request({
+        url: '/notes/batch',
+        method: 'put',
+        data: notes
+    })
+}
+
 export function deleteNote(id) {
     return request({
         url: '/notes/' + id,
