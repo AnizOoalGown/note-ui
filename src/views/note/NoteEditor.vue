@@ -15,6 +15,8 @@
 
 <script>
     import {getNoteById, updateNote} from "@/api/note";
+    import {createImage, deleteImage} from "@/api/image";
+    import {dataURLtoFile} from "@/utils/imageUtils";
 
     export default {
         name: 'NoteEditor',
@@ -22,7 +24,6 @@
         data() {
             return {
                 content: '',
-                images: [],
                 loading: false
             }
         },
@@ -35,25 +36,37 @@
                 })
             },
             imgAdd(pos, file) {
-                console.log(file)
-                // https://pic2.zhimg.com/80/v2-a248b8f1b73c4521eb84b694c25cb3da_720w.jpg?source=1940ef5c
-                const id = new Date().getTime() % 1e6 + ''
-                this.$refs.md.$img2Url(pos, id)
-                this.$refs.md.$imgUpdateByUrl(id, file.miniurl)
+                this.loading = true
+                createImage(this.$route.params.id, file).then(res => {
+                    const no = res.data['no']
+                    this.$refs.md.$img2Url(pos, no)
+                    this.$refs.md.$imgUpdateByUrl(no, file.miniurl)
+                }).catch(err => console.log(err))
+                .finally(() => this.loading = false)
+
             },
-            imgDel(/*map*/) {
-                // http
+            imgDel(arr) {
+                this.loading = true
+                const no = arr[0]
+                deleteImage(this.$route.params.id, no).finally(() => this.loading = false)
             },
             viewNote(noteId) {
                 this.loading = true
                 getNoteById(noteId).then(res => {
                     this.content = res.data.content
-                    this.images = res.data.images
+                    this.$refs.md.$refs.toolbar_left.img_file = this.$refs.md.$refs.toolbar_left.img_file.slice(0, 1)
+                    res.data.images.forEach(image => {
+                        const url = 'data:image/png;base64,' + image['data']
+                        this.$refs.md.$imgUpdateByUrl(image['no'], url)
+                        const file = dataURLtoFile(url, image['no'])
+                        this.$refs.md.$refs.toolbar_left.$imgAddByFilename(image['no'], file)
+                    })
                 }).finally(() => this.loading = false)
             }
         },
 
         mounted () {
+            console.log(this.$refs.md.$refs.toolbar_left.img_file)
             window.addEventListener('beforeunload', () => {
                 this.save(this.$route.params.id)
             })
