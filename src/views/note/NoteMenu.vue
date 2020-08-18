@@ -14,7 +14,6 @@
         <div class="main" v-loading="treeLoading">
             <el-tree ref="tree"
                      :data="tree"
-                     :default-expanded-keys="[161197]"
                      :draggable="editable"
                      :filter-node-method="filterNode"
                      :expand-on-click-node="!editable"
@@ -22,6 +21,8 @@
                      @node-click="nodeClick"
                      :allow-drop="allowDrop"
                      @node-drop="handleDrop"
+                     node-key="id"
+                     :highlight-current="true"
                      class="tree scrollbar">
             <span slot-scope="{ node, data }" class="custom-tree-node">
                 <span>
@@ -158,7 +159,7 @@
             },
             nodeClick(data) {
                 if (data.type === 'document' &&
-                    !(this.$route.params.id && parseInt(this.$route.params.id) === data.id)) {
+                    !(this.noteId && parseInt(this.noteId) === data.id)) {
                     this.$router.push('/note/' + data.id)
                 }
             },
@@ -287,9 +288,23 @@
             getMenuTree() {
                 return new Promise(resolve => {
                     getMenuTreeByUserId(this.$store.getters.userId)
-                        .then(res => this.tree = res.data)
+                        .then(res => {
+                            this.tree = res.data
+                            this.$nextTick(() => {
+                                this.$refs.tree.setCurrentKey(this.noteId)
+                                const node = this.$refs.tree.getNode(this.noteId)
+                                if (node) {
+                                    let parent = node.parent
+                                    while (parent) {
+                                        parent.expanded = true
+                                        parent = parent.parent
+                                    }
+                                }
+                            })
+                        })
                         .catch(err => console.log(err))
                         .finally(() => {
+
                             resolve()
                         })
                 })
@@ -308,6 +323,9 @@
                 if (this.form.type === 'folder') return '文件夹'
                 else if (this.form.type === 'document') return '笔记'
                 else return ''
+            },
+            noteId() {
+                return this.$route.params.id
             }
         },
 

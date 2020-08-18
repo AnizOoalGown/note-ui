@@ -6,7 +6,7 @@
                       v-loading="loading"
                       defaultOpen="preview"
                       :subfield="false"
-                      @save="save($route.params.id)"
+                      @save="save(noteId)"
                       @imgAdd="imgAdd"
                       @imgDel="imgDel"
                       class="mavon-editor"/>
@@ -37,7 +37,7 @@
             },
             imgAdd(pos, file) {
                 this.loading = true
-                createImage(this.$route.params.id, file).then(res => {
+                createImage(this.noteId, file).then(res => {
                     const no = res.data['no']
                     this.$refs.md.$img2Url(pos, no)
                     this.$refs.md.$imgUpdateByUrl(no, file.miniurl)
@@ -48,7 +48,7 @@
             imgDel(arr) {
                 this.loading = true
                 const no = arr[0]
-                deleteImage(this.$route.params.id, no).finally(() => this.loading = false)
+                deleteImage(this.noteId, no).finally(() => this.loading = false)
             },
             viewNote(noteId) {
                 this.loading = true
@@ -66,14 +66,19 @@
         },
 
         mounted () {
-            console.log(this.$refs.md.$refs.toolbar_left.img_file)
             window.addEventListener('beforeunload', () => {
-                this.save(this.$route.params.id)
+                this.save(this.noteId)
             })
         },
 
+        computed: {
+            noteId() {
+                return this.$route.params.id
+            }
+        },
+
         watch: {
-            '$route.params.id': {
+            noteId: {
                 handler: function (val, oldVal) {
                     if (oldVal) {
                         this.save(oldVal)
