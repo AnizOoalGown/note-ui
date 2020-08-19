@@ -33,7 +33,7 @@
                 updateNote({
                     id: noteId,
                     content: this.content
-                })
+                }).catch(err => console.log(err))
             },
             imgAdd(pos, file) {
                 this.loading = true

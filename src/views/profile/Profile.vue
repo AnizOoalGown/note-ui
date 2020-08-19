@@ -14,7 +14,7 @@
                               @input="saveUserInfoShow = true"/>
                 </el-form-item>
                 <el-form-item v-if="saveUserInfoShow">
-                    <el-button type="primary" @click="submitUserInfoForm">保存</el-button>
+                    <el-button type="primary" @click="submitUserInfoForm" :loading="saveUserInfoLoading">保存</el-button>
                     <el-button @click="resetUserInfoForm">取消</el-button>
                 </el-form-item>
             </el-form>
@@ -40,7 +40,7 @@
                               @input="savePasswordShow = true"></el-input>
                 </el-form-item>
                 <el-form-item v-if="savePasswordShow">
-                    <el-button type="primary" @click="submitPasswordForm">保存</el-button>
+                    <el-button type="primary" @click="submitPasswordForm" :loading="savePasswordLoading">保存</el-button>
                     <el-button @click="resetPasswordForm">取消</el-button>
                 </el-form-item>
             </el-form>
@@ -51,13 +51,13 @@
 
             <div class="title">销户</div>
             <el-divider/>
-            <el-button type="danger">销户</el-button>
+            <el-button type="danger" @click="closeAccount">销户</el-button>
         </div>
     </div>
 </template>
 
 <script>
-    import {logout} from "@/api/user";
+    import {deleteUser, getUser, logout, updatePassword, updateUsername} from "@/api/user";
     import {removeToken} from "@/utils/token";
 
     export default {
@@ -87,6 +87,8 @@
             return {
                 saveUserInfoShow: false,
                 savePasswordShow: false,
+                saveUserInfoLoading: false,
+                savePasswordLoading: false,
                 userInfoForm: {
                     username: this.$store.getters.username
                 },
@@ -119,10 +121,13 @@
             submitUserInfoForm() {
                 this.$refs.userInfoForm.validate((valid) => {
                     if (valid) {
-                        alert('submit!')
-                    } else {
-                        console.log('error submit!!')
-                        return false;
+                        this.saveUserInfoLoading = true
+                        updateUsername(this.$store.getters.userId, this.userInfoForm.username).then(() => {
+                            getUser(this.$store.getters.userId).then(res => {
+                                this.$store.commit('setUser', res.data)
+                            }).catch(err => console.log(err))
+                        }).catch(err => console.log(err))
+                            .finally(() => this.saveUserInfoLoading = false)
                     }
                 })
             },
@@ -133,10 +138,12 @@
             submitPasswordForm() {
                 this.$refs.passwordForm.validate((valid) => {
                     if (valid) {
-                        alert('submit!')
-                    } else {
-                        console.log('error submit!!')
-                        return false;
+                        this.savePasswordLoading = true
+                        updatePassword(this.$store.getters.userId,
+                            this.passwordForm.password, this.passwordForm.newPassword)
+                            .then(() => this.$message.success('修改密码成功'))
+                            .catch(err => console.log(err))
+                            .finally(() => this.savePasswordLoading = false)
                     }
                 })
             },
@@ -159,6 +166,24 @@
                         location.reload()
                     }).catch(err => console.log(err))
                 })
+            },
+            closeAccount() {
+                this.$confirm('确定删除用户及其笔记？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    deleteUser(this.$store.getters.userId)
+                        .then(() => this.$message.success('删除用户' + this.$store.getters.username + '成功'))
+                        .catch(err => console.log(err))
+                        .finally(() => {
+                            this.$store.commit('setUser', {
+                                id: undefined,
+                                username: undefined
+                            })
+                            location.reload()
+                        })
+                }).catch(err => console.log(err))
             }
         }
     }
