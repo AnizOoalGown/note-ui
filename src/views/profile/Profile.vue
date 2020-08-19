@@ -68,8 +68,8 @@
                 if (value === '') {
                     callback(new Error('请输入密码'))
                 } else {
-                    if (this.userInfoForm.newCheckPassword !== '') {
-                        this.$refs.userInfoForm.validateField('newCheckPassword')
+                    if (this.passwordForm.newCheckPassword !== '') {
+                        this.$refs.passwordForm.validateField('newCheckPassword')
                     }
                     callback()
                 }
@@ -77,7 +77,7 @@
             const validatePass2 = (rule, value, callback) => {
                 if (value === '') {
                     callback(new Error('请再次输入密码'))
-                } else if (value !== this.userInfoForm.newPassword) {
+                } else if (value !== this.passwordForm.newPassword) {
                     callback(new Error('两次输入密码不一致!'))
                 } else {
                     callback()
@@ -126,7 +126,8 @@
                             getUser(this.$store.getters.userId).then(res => {
                                 this.$store.commit('setUser', res.data)
                             }).catch(err => console.log(err))
-                        }).catch(err => console.log(err))
+                        }).then(() => this.$message.success('修改用户信息成功'))
+                            .catch(err => console.log(err))
                             .finally(() => this.saveUserInfoLoading = false)
                     }
                 })
@@ -174,15 +175,16 @@
                     type: 'warning'
                 }).then(() => {
                     deleteUser(this.$store.getters.userId)
-                        .then(() => this.$message.success('删除用户' + this.$store.getters.username + '成功'))
-                        .catch(err => console.log(err))
-                        .finally(() => {
+                        .then(() => {
+                            this.$message.success('删除用户' + this.$store.getters.username + '成功')
+                            removeToken()
                             this.$store.commit('setUser', {
                                 id: undefined,
                                 username: undefined
                             })
                             location.reload()
                         })
+                        .catch(err => console.log(err))
                 }).catch(err => console.log(err))
             }
         }

@@ -1,6 +1,7 @@
 import axios from 'axios'
-import {Notification} from 'element-ui'
-import { getToken } from '@/utils/token'
+import store from '@/store'
+import {Notification, MessageBox} from 'element-ui'
+import {getToken, removeToken} from '@/utils/token'
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
@@ -22,7 +23,26 @@ instance.interceptors.request.use(
 )
 
 instance.interceptors.response.use(res => {
-    if (res.data.code !== 200) {
+    const code = res.data.code
+    if (code === 401) {
+        MessageBox.confirm(
+            '登录状态已过期，您可以继续留在该页面，或者重新登录',
+            '系统提示',
+            {
+                confirmButtonText: '重新登录',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }
+        ).then(() => {
+            removeToken()
+            store.commit('setUser', {
+                id: undefined,
+                username: undefined
+            })
+            location.reload()
+        })
+    }
+    else if (code !== 200) {
         Notification.warning({
             title: res.data.code,
             message: res.data.msg
