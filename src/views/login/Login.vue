@@ -47,8 +47,8 @@
                 if (value === '') {
                     callback(new Error('请输入密码'))
                 } else {
-                    if (this.form.checkPassword !== '') {
-                        this.$refs.form.validateField('checkPassword')
+                    if (this.activeName === 'register' && this.form.checkPassword !== '') {
+                        this.$refs.registerForm.validateField('checkPassword')
                     }
                     callback()
                 }
@@ -73,14 +73,14 @@
                 },
                 rules: {
                     username: [
-                        { required: true, message: '请输入用户名', trigger: 'blur' },
-                        { max: 16, message: '长度小于16个字符', trigger: 'blur' }
+                        { required: true, message: '请输入用户名', trigger: 'change' },
+                        { max: 16, message: '长度小于16个字符', trigger: 'change' }
                     ],
                     password: [
-                        { validator: validatePass, trigger: 'blur' }
+                        { validator: validatePass, trigger: 'change' }
                     ],
                     checkPassword: [
-                        { validator: validatePass2, trigger: 'blur' }
+                        { validator: validatePass2, trigger: 'change' }
                     ]
                 },
                 redirect: undefined
