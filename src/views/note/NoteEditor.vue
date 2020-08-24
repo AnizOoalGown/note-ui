@@ -6,7 +6,7 @@
                       v-loading="loading"
                       defaultOpen="preview"
                       :subfield="false"
-                      @save="save(noteId)"
+                      @save="save(noteId, true)"
                       @imgAdd="imgAdd"
                       @imgDel="imgDel"
                       class="mavon-editor"/>
@@ -24,16 +24,29 @@
         data() {
             return {
                 content: '',
+                originalContent: '',
                 loading: false
             }
         },
 
         methods: {
-            save(noteId) {
-                updateNote({
-                    id: noteId,
-                    content: this.content
-                }).catch(err => console.log(err))
+            save(noteId, feedback) {
+                return new Promise(resolve => {
+                    if (this.content === this.originalContent && !feedback) {
+                        resolve()
+                        return
+                    }
+                    this.loading = true
+                    updateNote({
+                        id: noteId,
+                        content: this.content
+                    }).then(() => {
+                        if (feedback) this.$message.success('手动保存成功')
+                        resolve()
+                    }).catch(err => console.log(err))
+                        .finally(() => this.loading = false)
+                })
+
             },
             imgAdd(pos, file) {
                 this.loading = true
@@ -54,6 +67,7 @@
                 this.loading = true
                 getNoteById(noteId).then(res => {
                     this.content = res.data.content
+                    this.originalContent = res.data.content
                     this.$refs.md.$refs.toolbar_left.img_file = this.$refs.md.$refs.toolbar_left.img_file.slice(0, 1)
                     res.data.images.forEach(image => {
                         const url = 'data:image/png;base64,' + image['data']
@@ -61,7 +75,7 @@
                         const file = dataURLtoFile(url, image['no'])
                         this.$refs.md.$refs.toolbar_left.$imgAddByFilename(image['no'], file)
                     })
-                }).finally(() => this.loading = false)
+                }).catch(err => console.log(err)).finally(() => this.loading = false)
             }
         },
 
@@ -81,12 +95,19 @@
             noteId: {
                 handler: function (val, oldVal) {
                     if (oldVal) {
-                        this.save(oldVal)
+                        this.save(oldVal).then(() => this.viewNote(val))
                     }
-                    this.viewNote(val)
+                    else {
+                        this.viewNote(val)
+                    }
                 },
                 immediate: true
             }
+        },
+
+        beforeRouteLeave(to, from, next) {
+            this.save(this.noteId)
+            next()
         }
     }
 </script>
