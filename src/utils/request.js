@@ -43,10 +43,7 @@ instance.interceptors.response.use(res => {
         })
     }
     else if (code !== 200) {
-        Notification.warning({
-            title: res.data.code,
-            message: res.data.msg
-        })
+        Notification.warning(res.data.msg)
         return Promise.reject(res.data)
     }
     else {
