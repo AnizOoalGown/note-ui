@@ -51,7 +51,7 @@
 
             <div class="title">销户</div>
             <el-divider/>
-            <el-button type="danger" @click="closeAccount">销户</el-button>
+            <el-button type="danger" @click="closeAccount" :loading="closeLoading">销户</el-button>
         </div>
     </div>
 </template>
@@ -89,6 +89,7 @@
                 savePasswordShow: false,
                 saveUserInfoLoading: false,
                 savePasswordLoading: false,
+                closeLoading: false,
                 userInfoForm: {
                     username: this.$store.getters.username
                 },
@@ -166,15 +167,15 @@
                         })
                         location.reload()
                     }).catch(err => console.log(err))
-                })
+                }).catch(() => {})
             },
             closeAccount() {
-                this.$confirm('确定删除用户及其笔记？', '提示', {
+                this.$prompt('请输入密码', '确定删除此账户？', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    deleteUser(this.$store.getters.userId)
+                }).then(({value}) => {
+                    this.closeLoading = true
+                    deleteUser(this.$store.getters.userId, value)
                         .then(() => {
                             this.$message.success('删除用户' + this.$store.getters.username + '成功')
                             removeToken()
@@ -185,7 +186,8 @@
                             location.reload()
                         })
                         .catch(err => console.log(err))
-                }).catch(err => console.log(err))
+                        .finally(() => this.closeLoading = false)
+                }).catch(() => {})
             }
         }
     }

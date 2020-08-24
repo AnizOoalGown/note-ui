@@ -62,9 +62,13 @@ export function updatePassword(id, password, newPassword) {
     })
 }
 
-export function deleteUser(id) {
+export function deleteUser(id, password) {
+    const formData = new FormData
+    formData.append('password', password)
+
     return request({
-        url: '/users/' + id,
-        method: 'delete'
+        url: '/users/close/' + id,
+        method: 'post',
+        data: formData
     })
 }
