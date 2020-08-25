@@ -14,13 +14,52 @@
                 <el-menu-item index="/about">关于Notes</el-menu-item>
             </el-menu>
         </el-col>
-        <el-col :offset="1" :span="2" class="username">{{ $store.getters.username }}</el-col>
+        <el-col :offset="1" :span="2">
+            <el-dropdown trigger="hover">
+                <div class="username el-dropdown-link">
+                    {{ $store.getters.username }}<i class="el-icon-arrow-down el-icon--right"></i>
+                </div>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item>
+                        <router-link to="/profile" style="color: #606266; text-decoration: none">
+                            个人中心
+                        </router-link>
+                    </el-dropdown-item>
+                    <el-dropdown-item divided @click.native="logout">
+                        <span>退出登录</span>
+                    </el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+        </el-col>
     </el-row>
 </template>
 
 <script>
+    import {logout} from "@/api/user";
+    import {removeToken} from "@/utils/token";
+
     export default {
-        name: "NavBar"
+        name: "NavBar",
+
+        methods: {
+            logout() {
+                this.$confirm('确定退出登录？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    logout().then(() => {
+                        removeToken()
+                        this.$store.commit('setUser', {
+                            id: undefined,
+                            username: undefined
+                        })
+                        location.reload()
+                    }).catch(err => console.log(err))
+                }).catch(() => {
+                })
+            }
+        }
     }
 </script>
 
@@ -29,21 +68,32 @@
         height: 70px;
         background-color: #2B2B2B;
     }
+
     .title {
         color: white;
         font-size: xx-large;
         margin-top: 15px;
     }
+
     .username {
-        color: white;
-        font-size: large;
+        font-size: x-large;
         margin-top: 25px;
     }
+
     .menubar .el-menu-item {
         padding-top: 10px;
         font-size: large;
         height: 70px;
         width: 200px;
         text-align: center;
+    }
+
+    .el-dropdown-link {
+        cursor: pointer;
+        color: white;
+    }
+
+    .el-icon-arrow-down {
+        font-size: 12px;
     }
 </style>
