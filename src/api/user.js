@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
-export function login(username, password, uuid, code) {
+export function login(username, password, uuid, verifyCode) {
     const formData = new FormData()
     formData.append('username', username)
     formData.append('password', password)
     formData.append('uuid', uuid)
-    formData.append('code', code)
+    formData.append('verify_code', verifyCode)
 
     return request({
         url: '/login',
@@ -29,12 +29,13 @@ export function getUser(id) {
     })
 }
 
-export function createUser(username, password, uuid, code) {
+export function createUser(username, password, uuid, verifyCode, inviteCode) {
     const formData = new FormData()
     formData.append('username', username)
     formData.append('password', password)
     formData.append('uuid', uuid)
-    formData.append('code', code)
+    formData.append('verify_code', verifyCode)
+    formData.append('invite_code', inviteCode)
 
     return request({
         url: '/users',
