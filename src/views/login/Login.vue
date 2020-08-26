@@ -1,63 +1,65 @@
 <template>
-    <el-tabs v-model="activeName" class="login-container" label-width="80px" stretch type="border-card">
-        <el-tab-pane label="登录" name="login">
-            <el-form :model="form"
-                     ref="loginForm"
-                     label-position="top"
-                     hide-required-asterisk
-                     :rules="rules">
-                <el-form-item label="用户名" prop="username">
-                    <el-input v-model="form.username"></el-input>
-                </el-form-item>
-                <el-form-item label="密码" prop="password">
-                    <el-input v-model="form.password" type="password"></el-input>
-                </el-form-item>
-                <el-form-item label="验证码" prop="verifyCode">
-                    <el-input v-model="form.verifyCode"
-                              placeholder="验证码"
-                              style="width: 63%"/>
-                    <div class="login-code">
-                        <img :src="image" @click="getCode" alt="加载失败"/>
-                    </div>
-                </el-form-item>
-                <el-form-item class="button-container">
-                    <el-button type="primary" @click="onLogin" :loading="loading">登录</el-button>
-                </el-form-item>
-            </el-form>
-        </el-tab-pane>
-        <el-tab-pane label="注册" name="register">
-            <el-form :model="form"
-                     status-icon
-                     :rules="rules"
-                     ref="registerForm"
-                     label-position="top"
-                     hide-required-asterisk>
-                <el-form-item label="用户名" prop="username">
-                    <el-input v-model="form.username" autocomplete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="密码" prop="password">
-                    <el-input type="password" v-model="form.password" autocomplete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="确认密码" prop="checkPassword">
-                    <el-input type="password" v-model="form.checkPassword" autocomplete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="邀请码" prop="inviteCode">
-                    <el-input type="password" v-model="form.inviteCode" autocomplete="off"/>
-                </el-form-item>
-                <el-form-item label="验证码" prop="verifyCode">
-                    <el-input v-model="form.verifyCode"
-                              placeholder="验证码"
-                              style="width: 63%"/>
-                    <div class="login-code">
-                        <img :src="image" @click="getCode" alt="加载失败"/>
-                    </div>
-                </el-form-item>
-                <el-form-item class="button-container">
-                    <el-button type="primary" @click="onSignUp" :loading="loading">注册</el-button>
-                </el-form-item>
-            </el-form>
-        </el-tab-pane>
-    </el-tabs>
+    <div class="scrollbar">
+        <el-tabs v-model="activeName" class="login-container" label-width="80px" stretch type="border-card">
+            <el-tab-pane label="登录" name="login">
+                <el-form :model="form"
+                         ref="loginForm"
+                         label-position="top"
+                         hide-required-asterisk
+                         :rules="rules">
+                    <el-form-item label="用户名" prop="username">
+                        <el-input v-model="form.username"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="password">
+                        <el-input v-model="form.password" type="password"></el-input>
+                    </el-form-item>
+                    <el-form-item label="验证码" prop="verifyCode">
+                        <el-input v-model="form.verifyCode"
+                                  placeholder="验证码"
+                                  style="width: 63%"/>
+                        <div class="login-code">
+                            <img :src="image" @click="getCode" alt="加载失败"/>
+                        </div>
+                    </el-form-item>
+                    <el-form-item class="button-container">
+                        <el-button type="primary" @click="onLogin" :loading="loading">登录</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="注册" name="register">
+                <el-form :model="form"
+                         status-icon
+                         :rules="rules"
+                         ref="registerForm"
+                         label-position="top"
+                         hide-required-asterisk>
+                    <el-form-item label="用户名" prop="username">
+                        <el-input v-model="form.username" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="password">
+                        <el-input type="password" v-model="form.password" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="确认密码" prop="checkPassword">
+                        <el-input type="password" v-model="form.checkPassword" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邀请码" prop="inviteCode">
+                        <el-input type="password" v-model="form.inviteCode" autocomplete="off"/>
+                    </el-form-item>
+                    <el-form-item label="验证码" prop="verifyCode">
+                        <el-input v-model="form.verifyCode"
+                                  placeholder="验证码"
+                                  style="width: 63%"/>
+                        <div class="login-code">
+                            <img :src="image" @click="getCode" alt="加载失败"/>
+                        </div>
+                    </el-form-item>
+                    <el-form-item class="button-container">
+                        <el-button type="primary" @click="onSignUp" :loading="loading">注册</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
 </template>
 
 <script>
@@ -182,13 +184,17 @@
     }
 </script>
 
-<style>
+<style scoped>
+    .scrollbar {
+        height: 100%;
+    }
+
     .login-container {
         -webkit-border-radius: 5px;
         border-radius: 5px;
         -moz-border-radius: 5px;
         background-clip: padding-box;
-        margin: 150px auto;
+        margin: 100px auto;
         width: 350px;
         background: #fff;
         border: 1px solid #eaeaea;

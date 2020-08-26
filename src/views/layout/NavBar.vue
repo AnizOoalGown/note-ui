@@ -1,7 +1,7 @@
 <template>
     <el-row class="nav-bar">
         <el-col :offset="1" :span="2" class="title">Notes</el-col>
-        <el-col :offset="2" :span="16">
+        <el-col :offset="3" :span="15">
             <el-menu class="menubar"
                      :router="true"
                      :default-active="this.$route.path"
@@ -65,25 +65,24 @@
 
 <style scoped type="scss">
     .nav-bar {
-        height: 70px;
+        height: 55px;
         background-color: #2B2B2B;
     }
 
     .title {
         color: white;
         font-size: xx-large;
-        margin-top: 15px;
+        margin-top: 7px;
     }
 
     .username {
         font-size: x-large;
-        margin-top: 25px;
+        margin-top: 12px;
     }
 
     .menubar .el-menu-item {
-        padding-top: 10px;
         font-size: large;
-        height: 70px;
+        height: 55px;
         width: 200px;
         text-align: center;
     }

@@ -114,6 +114,6 @@
 
 <style scoped>
     .mavon-editor {
-        height: calc(100vh - 70px);
+        height: calc(100vh - 55px);
     }
 </style>

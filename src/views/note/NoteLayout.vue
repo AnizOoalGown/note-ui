@@ -15,14 +15,14 @@
 
 <style scoped>
     .sideBar {
-        width: 400px;
+        width: 380px;
         height: 100%;
         position: fixed;
         border-right: grey 1px solid;
     }
     .note-container {
         height: 100px;
-        margin-left: 400px;
+        margin-left: 380px;
     }
 
 </style>

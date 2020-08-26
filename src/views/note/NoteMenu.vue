@@ -7,7 +7,7 @@
                       clearable
                       size="medium"
                       prefix-icon="el-icon-search"
-                      style="width: 240px"/>
+                      style="width: 220px"/>
             <el-switch v-model="editable" active-text="编辑"/>
         </div>
 
@@ -347,7 +347,7 @@
     }
 
     .main {
-        padding: 0 0 30px 30px;
+        padding: 0 0 30px 20px;
     }
 
     .tree {

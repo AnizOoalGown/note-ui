@@ -201,7 +201,7 @@
     .profile-container {
         width: 500px;
         margin: 0 auto;
-        height: calc(100vh - 70px)
+        height: calc(100vh - 55px)
     }
 
     .title {
