@@ -235,6 +235,7 @@
                             this.getMenuTree().then(() => {
                                 if (note.type === 'document') {
                                     this.$router.push('/note/' + res.data)
+                                    this.$refs.tree.setCurrentKey(res.data)
                                 }
                             }).finally(() => this.treeLoading = false)
                         }).catch(err => {
@@ -304,7 +305,6 @@
                         })
                         .catch(err => console.log(err))
                         .finally(() => {
-
                             resolve()
                         })
                 })
