@@ -65,6 +65,8 @@
             },
             viewNote(noteId) {
                 this.loading = true
+                this.content = ''
+                this.originalContent = ''
                 getNoteById(noteId).then(res => {
                     this.content = res.data.content
                     this.originalContent = res.data.content
@@ -75,7 +77,8 @@
                         const file = dataURLtoFile(url, image['no'])
                         this.$refs.md.$refs.toolbar_left.$imgAddByFilename(image['no'], file)
                     })
-                }).catch(err => console.log(err)).finally(() => this.loading = false)
+                    this.loading = false
+                }).catch(err => console.log(err))
             }
         },
 
