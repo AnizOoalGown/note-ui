@@ -61,6 +61,7 @@
 
                     if (this.$route.matched[1].path === '/note' && this.$route.params.id) {
                         this.$store.dispatch('saveNote', this.$route.params.id).then(() => {
+                            this.$store.commit('setOriginalContent', this.$store.getters.content)
                             logoutAndClearData()
                         })
                     }
