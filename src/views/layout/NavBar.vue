@@ -25,7 +25,7 @@
                             个人中心
                         </router-link>
                     </el-dropdown-item>
-                    <el-dropdown-item divided @click.native="logout">
+                    <el-dropdown-item divided @click.native="saveAndLogout">
                         <span>退出登录</span>
                     </el-dropdown-item>
                 </el-dropdown-menu>
@@ -42,22 +42,32 @@
         name: "NavBar",
 
         methods: {
-            logout() {
+            saveAndLogout() {
                 this.$confirm('确定退出登录？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    logout().then(() => {
-                        removeToken()
-                        this.$store.commit('setUser', {
-                            id: undefined,
-                            username: undefined
+                    const logoutAndClearData = () => {
+                        logout().then(() => {
+                            removeToken()
+                            this.$store.commit('setUser', {
+                                id: undefined,
+                                username: undefined
+                            })
+                            location.reload()
+                        }).catch(err => console.log(err))
+                    }
+
+                    if (this.$route.matched[1].path === '/note' && this.$route.params.id) {
+                        this.$store.dispatch('saveNote', this.$route.params.id).then(() => {
+                            logoutAndClearData()
                         })
-                        location.reload()
-                    }).catch(err => console.log(err))
-                }).catch(() => {
-                })
+                    }
+                    else {
+                        logoutAndClearData()
+                    }
+                }).catch(() => {})
             }
         }
     }

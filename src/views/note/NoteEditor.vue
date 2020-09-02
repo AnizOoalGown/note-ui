@@ -23,8 +23,6 @@
 
         data() {
             return {
-                content: '',
-                originalContent: '',
                 loading: false
             }
         },
@@ -46,7 +44,6 @@
                     }).catch(err => console.log(err))
                         .finally(() => this.loading = false)
                 })
-
             },
             imgAdd(pos, file) {
                 this.loading = true
@@ -56,7 +53,6 @@
                     this.$refs.md.$imgUpdateByUrl(no, file.miniurl)
                 }).catch(err => console.log(err))
                 .finally(() => this.loading = false)
-
             },
             imgDel(arr) {
                 this.loading = true
@@ -88,6 +84,22 @@
         computed: {
             noteId() {
                 return this.$route.params.id
+            },
+            content: {
+                get() {
+                    return this.$store.getters.content
+                },
+                set(newVal) {
+                    this.$store.commit('setContent', newVal)
+                }
+            },
+            originalContent: {
+                get() {
+                    return this.$store.getters.originalContent
+                },
+                set(newVal) {
+                    this.$store.commit('setOriginalContent', newVal)
+                }
             }
         },
 
